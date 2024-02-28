@@ -229,13 +229,12 @@ function getJSON(obj) {
  */
 function fromJSON(proto, json) {
   const parsedJson = JSON.parse(json);
-  const objResult = {};
-  for (let i = 0; i < Object.keys(parsedJson).length; i += 1) {
-    objResult[Object.keys(parsedJson)[i]] = {
-      value: parsedJson[Object.keys(parsedJson)[i]],
-    };
+  const objResult = Object.create(proto);
+  const keys = Object.keys(parsedJson);
+  for (let i = 0; i < keys.length; i += 1) {
+    objResult[keys[i]] = parsedJson[keys[i]];
   }
-  return Object.create(proto, objResult);
+  return objResult;
 }
 
 /**
@@ -264,8 +263,29 @@ function fromJSON(proto, json) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  const sortedByCountry = arr.sort((a, b) => (a.country > b.country ? 1 : -1));
+
+  const groupedCountries = [];
+  let currentCountries = [sortedByCountry[0]];
+  for (let i = 1; i < sortedByCountry.length; i += 1) {
+    if (
+      currentCountries[currentCountries.length - 1].country ===
+      sortedByCountry[i].country
+    ) {
+      currentCountries.push(sortedByCountry[i]);
+    } else {
+      groupedCountries.push(currentCountries);
+      currentCountries = [sortedByCountry[i]];
+    }
+    if (i === sortedByCountry.length - 1) {
+      groupedCountries.push(currentCountries);
+    }
+  }
+  for (let i = 0; i < groupedCountries.length; i += 1) {
+    groupedCountries[i].sort((a, b) => (a.city > b.city ? 1 : -1));
+  }
+  return groupedCountries.flat();
 }
 
 /**
